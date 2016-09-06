@@ -47,12 +47,15 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
 
     public interface OTAResultDelegate {
         void onOTASuccessful();
+
         void onOTAFailed();
 
         void onOTAProgressChanged(int progress);
+
         void onOTAProgressMax(int max);
 
         void onOpalBinaryInstallPrepare();
+
         void onOpalBinaryInstallProgress(int progress);
 
     }
@@ -101,16 +104,16 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
         @Override
         public void onOTAProgressChanged(int progress) {
 
-            ProgressDialogFragment pd = (ProgressDialogFragment)getSupportFragmentManager().findFragmentByTag(TAG_OTA_PROGRESS_DIALOG);
-            if(pd != null) {
+            ProgressDialogFragment pd = (ProgressDialogFragment) getSupportFragmentManager().findFragmentByTag(TAG_OTA_PROGRESS_DIALOG);
+            if (pd != null) {
                 pd.setProgress(progress);
             }
         }
 
         @Override
         public void onOTAProgressMax(int max) {
-            ProgressDialogFragment pd = (ProgressDialogFragment)getSupportFragmentManager().findFragmentByTag(TAG_OTA_PROGRESS_DIALOG);
-            if(pd != null) {
+            ProgressDialogFragment pd = (ProgressDialogFragment) getSupportFragmentManager().findFragmentByTag(TAG_OTA_PROGRESS_DIALOG);
+            if (pd != null) {
                 // Initialize progress and max
                 pd.setProgress(0);
                 pd.setMax(max);
@@ -120,8 +123,8 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
         @Override
         public void onOpalBinaryInstallPrepare() {
 
-            ProgressDialogFragment pd = (ProgressDialogFragment)getSupportFragmentManager().findFragmentByTag(TAG_OTA_PROGRESS_DIALOG);
-            if(pd != null) {
+            ProgressDialogFragment pd = (ProgressDialogFragment) getSupportFragmentManager().findFragmentByTag(TAG_OTA_PROGRESS_DIALOG);
+            if (pd != null) {
                 // Initialize progress and max
                 pd.setProgress(0);
                 pd.setMax(100);
@@ -133,13 +136,13 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
         @Override
         public void onOpalBinaryInstallProgress(int progress) {
 
-            ProgressDialogFragment pd = (ProgressDialogFragment)getSupportFragmentManager().findFragmentByTag(TAG_OTA_PROGRESS_DIALOG);
+            ProgressDialogFragment pd = (ProgressDialogFragment) getSupportFragmentManager().findFragmentByTag(TAG_OTA_PROGRESS_DIALOG);
 
-            if(pd != null) {
+            if (pd != null) {
                 pd.setProgress(progress);
 
                 // Opal Firmware Install finishes
-                if(progress == 100) {
+                if (progress == 100) {
                     showUpdateSuccessDialog();
 
                     // Read Opal version again
@@ -165,8 +168,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
 
             if (status == BleValues.START_SCAN) {
                 Log.d(TAG, "Scanning BLE devices");
-            }
-            else {
+            } else {
                 Log.d(TAG, "Stop scanning BLE devices");
             }
         }
@@ -185,8 +187,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
                 if (status == BluetoothProfile.STATE_CONNECTED) {
                     // TODO: needs testing for corner case handling
 
-                }
-                else if (status == BluetoothProfile.STATE_DISCONNECTED) {
+                } else if (status == BluetoothProfile.STATE_DISCONNECTED) {
                     // TODO: needs testing for corner case handling
 
                     checkBleAvailability();
@@ -214,24 +215,23 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
                 Log.d(TAG, "[HANS][onCharacteristicRead] address: " + address + ", uuid: " + uuid + " value : " + MathTools.byteArrayToHex(value));
 
                 runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
+                    @Override
+                    public void run() {
 
-                            // If version information is read, update version UI in navigation view if possible
-                            if(uuid.equalsIgnoreCase(OpalValues.OPAL_FIRMWARE_VERSION_CHAR_UUID) ||
-                                    uuid.equalsIgnoreCase(OpalValues.OPAL_OTA_BT_VERSION_CHAR_UUID)) {
-                                onUpdateVersion();
-                            }
-
-                            OpalMainFragment mainFragment = (OpalMainFragment)getSupportFragmentManager().findFragmentByTag(TAG_MAIN_FRAGMENT);
-                            if(mainFragment != null) {
-                                mainFragment.onOpalDataChanged(uuid, value);
-                            }
-                            else {
-                                // Do nothing
-                            }
+                        // If version information is read, update version UI in navigation view if possible
+                        if (uuid.equalsIgnoreCase(OpalValues.OPAL_FIRMWARE_VERSION_CHAR_UUID) ||
+                                uuid.equalsIgnoreCase(OpalValues.OPAL_OTA_BT_VERSION_CHAR_UUID)) {
+                            onUpdateVersion();
                         }
-                    });
+
+                        OpalMainFragment mainFragment = (OpalMainFragment) getSupportFragmentManager().findFragmentByTag(TAG_MAIN_FRAGMENT);
+                        if (mainFragment != null) {
+                            mainFragment.onOpalDataChanged(uuid, value);
+                        } else {
+                            // Do nothing
+                        }
+                    }
+                });
             }
         }
 
@@ -247,24 +247,23 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
 
                 OtaManager.getInstance().onHandleWriteResponse(uuid, status);
 
-                if(status == BluetoothGatt.GATT_SUCCESS) {
+                if (status == BluetoothGatt.GATT_SUCCESS) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
 
                             // if schedule write is successful, then update the product info
-                            if(uuid.equalsIgnoreCase(OpalValues.OPAL_SET_SCHEDULE_UUID)) {
+                            if (uuid.equalsIgnoreCase(OpalValues.OPAL_SET_SCHEDULE_UUID)) {
                                 productInfo.updateErd(uuid, value);
                             }
 
-                            OpalMainFragment mainFragment = (OpalMainFragment)getSupportFragmentManager().findFragmentByTag(TAG_MAIN_FRAGMENT);
-                            if(mainFragment != null) {
+                            OpalMainFragment mainFragment = (OpalMainFragment) getSupportFragmentManager().findFragmentByTag(TAG_MAIN_FRAGMENT);
+                            if (mainFragment != null) {
                                 mainFragment.onOpalDataChanged(uuid, value);
                             }
                         }
                     });
-                }
-                else {
+                } else {
                     // Write failure
                 }
             }
@@ -285,11 +284,10 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        OpalMainFragment mainFragment = (OpalMainFragment)getSupportFragmentManager().findFragmentByTag(TAG_MAIN_FRAGMENT);
-                        if(mainFragment != null) {
+                        OpalMainFragment mainFragment = (OpalMainFragment) getSupportFragmentManager().findFragmentByTag(TAG_MAIN_FRAGMENT);
+                        if (mainFragment != null) {
                             mainFragment.onOpalDataChanged(uuid, value);
-                        }
-                        else {
+                        } else {
                             // Do nothing
                         }
                     }
@@ -313,25 +311,23 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
 
         FragmentManager fm = getSupportFragmentManager();
 
-        if(fm != null &&
+        if (fm != null &&
                 fm.findFragmentByTag(TAG_OTA_PROGRESS_DIALOG) != null) {
             showUpdateFailureDialog();
-        }
-        else {
+        } else {
             // Do nothing
         }
     }
 
     private void onUpdateVersion() {
-        if(currentNavItemId == R.id.nav_item_about) {
+        if (currentNavItemId == R.id.nav_item_about) {
 
             Log.d(TAG, "[HANS][onUpdateVersion] : Updating version UI");
 
             opalFirmwareTv.setText(opalInfo.getFirmWareVersion());
             bleFirmwareTv.setText(opalInfo.getBTVersion());
 
-        }
-        else {
+        } else {
             Log.d(TAG, "[HANS][onUpdateVersion] : About UI is not visible so skip updating it");
         }
     }
@@ -358,10 +354,10 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
             @Override
             public void onBackStackChanged() {
 
-                if( getSupportFragmentManager().findFragmentByTag(TAG_SCHEDULE_FRAGMENT) != null ) {
+                if (getSupportFragmentManager().findFragmentByTag(TAG_SCHEDULE_FRAGMENT) != null) {
                     setToolBarTitle(getString(R.string.schedule_edit_schedule_title));
                     actionBarDrawerToggle.setDrawerIndicatorEnabled(false);
-                }else {
+                } else {
                     setToolBarTitle(getString(R.string.product_name_opal));
                     actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
                 }
@@ -387,7 +383,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
 
         // Read the version info
         BleManager.getInstance().readCharacteristics(opalInfo.bluetoothDevice, OpalValues.OPAL_OTA_BT_VERSION_CHAR_UUID);
-        BleManager.getInstance().readCharacteristics(opalInfo .bluetoothDevice, OpalValues.OPAL_FIRMWARE_VERSION_CHAR_UUID);
+        BleManager.getInstance().readCharacteristics(opalInfo.bluetoothDevice, OpalValues.OPAL_FIRMWARE_VERSION_CHAR_UUID);
     }
 
     @Override
@@ -412,7 +408,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
                 item.setChecked(true);
                 currentNavItemId = item.getItemId();
 
-                switch(item.getItemId()) {
+                switch (item.getItemId()) {
                     case R.id.nav_item_my_product:
 
                         IntentTools.goToDashboard(OpalMainActivity.this, OpalMainActivity.class.getSimpleName());
@@ -432,33 +428,32 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
 
                     case R.id.nav_item_contact_expert:
                         IntentTools.composeEmail(getBaseContext(),
-                                new String[] {IntentTools.OPAL_CONTACT_AN_EXPERT_EMAIL_ADDRESS},
+                                new String[]{IntentTools.OPAL_CONTACT_AN_EXPERT_EMAIL_ADDRESS},
                                 IntentTools.OPAL_CONTACT_AN_EXPERT_EAMIL_SUBJECT);
                         break;
 
                     case R.id.nav_item_contact_warranty:
                         IntentTools.composeEmail(getBaseContext(),
-                                new String[] {IntentTools.OPAL_CONTACT_WARRANTY_EMAIL_ADDRESS},
+                                new String[]{IntentTools.OPAL_CONTACT_WARRANTY_EMAIL_ADDRESS},
                                 IntentTools.OPAL_CONTACT_WARRANTY_EMAIL_SUBJECT);
                         break;
 
                     case R.id.nav_item_feedback:
+                        // todo GAV This is where I think I need to make the button.
                         IntentTools.composeEmail(getBaseContext(),
-                                new String[] {IntentTools.OPAL_FEEDBACK_EMAIL_ADDRESS},
+                                new String[]{IntentTools.OPAL_FEEDBACK_EMAIL_ADDRESS},
                                 IntentTools.OPAL_FEEDBACK_EMAIL_SUBJECT);
-
                         break;
+
                     case R.id.nav_item_about:
-
                         refreshAboutUI();
-
                         break;
-                    case R.id.nav_item_update:
 
+                    case R.id.nav_item_update:
                         // BLE update first
-                        if(opalInfo.isBLEModuleUpgradeRequired()) {
+                        if (opalInfo.isBLEModuleUpgradeRequired()) {
                             showUpdateConfirmDialog(TAG_BLE_OTA_UPDATE_CONFIRM_DIALOG);
-                        } else if(opalInfo.isOpalFirmwareUpgradeRequired()) {
+                        } else if (opalInfo.isOpalFirmwareUpgradeRequired()) {
                             showUpdateConfirmDialog(TAG_OPAL_OTA_UPDATE_CONFIRM_DIALOG);
                         } else {
                             showUpdateNotAvailableDialog();
@@ -506,7 +501,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
         navigationView.getHeaderView(0).findViewById(R.id.back_btn_container)
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
-                        public void onClick(View v) {
+                    public void onClick(View v) {
                         View back_btn_header = navigationView.getHeaderView(0);
                         View headerContents = navigationView.getHeaderView(1);
                         navigationView.removeHeaderView(back_btn_header);
@@ -520,11 +515,11 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
         // Update about contents
         View aboutContentsView = navigationView.getHeaderView(1);
 
-        opalFirmwareTv = ((TextView)aboutContentsView.findViewById(R.id.opal_about_firmware_version));
-        bleFirmwareTv = ((TextView)aboutContentsView.findViewById(R.id.opal_about_bt_version));
+        opalFirmwareTv = ((TextView) aboutContentsView.findViewById(R.id.opal_about_firmware_version));
+        bleFirmwareTv = ((TextView) aboutContentsView.findViewById(R.id.opal_about_bt_version));
 
 
-        ((TextView)aboutContentsView.findViewById(R.id.opal_about_app_version)).setText(FirstBuildApplication.getInstance().getAppVersion());
+        ((TextView) aboutContentsView.findViewById(R.id.opal_about_app_version)).setText(FirstBuildApplication.getInstance().getAppVersion());
         opalFirmwareTv.setText(opalInfo.getFirmWareVersion());
         bleFirmwareTv.setText(opalInfo.getBTVersion());
 
@@ -548,7 +543,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
     private void showUpdateConfirmDialog(String tag) {
         FragmentManager fm = getSupportFragmentManager();
 
-        if(fm != null &&
+        if (fm != null &&
                 fm.findFragmentByTag(tag) != null) {
             // skip showing dialog as it is already shown
             return;
@@ -566,7 +561,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
     private void showUpdateNotAvailableDialog() {
         FragmentManager fm = getSupportFragmentManager();
 
-        if(fm != null &&
+        if (fm != null &&
                 fm.findFragmentByTag(TAG_OTA_UPDATE_NOT_AVAILABLE_DIALOG) != null) {
             // skip showing dialog as it is already shown
             return;
@@ -586,7 +581,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
 
         dismissProgressDialog(fm);
 
-        if(fm != null &&
+        if (fm != null &&
                 fm.findFragmentByTag(TAG_OTA_FAILURE_DIALOG) != null) {
             // skip showing dialog as it is already shown
             return;
@@ -603,9 +598,9 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
 
     private void dismissProgressDialog(FragmentManager fm) {
 
-        if(fm != null &&
+        if (fm != null &&
                 fm.findFragmentByTag(TAG_OTA_PROGRESS_DIALOG) != null) {
-            ((DialogFragment)fm.findFragmentByTag(TAG_OTA_PROGRESS_DIALOG)).dismiss();
+            ((DialogFragment) fm.findFragmentByTag(TAG_OTA_PROGRESS_DIALOG)).dismiss();
         }
     }
 
@@ -614,7 +609,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
 
         dismissProgressDialog(fm);
 
-        if(fm != null &&
+        if (fm != null &&
                 fm.findFragmentByTag(TAG_OTA_SUCCESS_DIALOG) != null) {
             // skip showing dialog as it is already shown
             return;
@@ -632,7 +627,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
     private void showProgressDialog() {
         FragmentManager fm = getSupportFragmentManager();
 
-        if(fm != null &&
+        if (fm != null &&
                 fm.findFragmentByTag(TAG_OTA_PROGRESS_DIALOG) != null) {
             // skip showing dialog as it is already shown
             return;
@@ -655,7 +650,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
                 drawerLayout,
                 toolbar,
                 R.string.openDrawer,
-                R.string.closeDrawer){
+                R.string.closeDrawer) {
 
             @Override
             public void onDrawerClosed(View drawerView) {
@@ -709,8 +704,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
             Log.d(TAG, "Bluetooth adapter is disabled. Enable bluetooth adapter.");
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        }
-        else {
+        } else {
             Log.d(TAG, "Bluetooth adapter is already enabled. Start connect");
         }
     }
@@ -740,9 +734,9 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
     @Override
     public void onOTAStart() {
 
-        if(opalInfo.isBLEModuleUpgradeRequired()) {
+        if (opalInfo.isBLEModuleUpgradeRequired()) {
             OtaManager.getInstance().startBleOtaProcess(opalInfo.bluetoothDevice, otaResultDelegate);
-        } else if(opalInfo.isOpalFirmwareUpgradeRequired()) {
+        } else if (opalInfo.isOpalFirmwareUpgradeRequired()) {
             OtaManager.getInstance().startOpalOtaProcess(opalInfo.bluetoothDevice, otaResultDelegate);
         } else {
 
@@ -754,12 +748,12 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
     public void onTimeSlotClicked(View v) {
         FragmentManager fm = getSupportFragmentManager();
 
-        if(fm != null &
+        if (fm != null &
                 fm.findFragmentByTag(TAG_SCHEDULE_FRAGMENT) == null) {
             return;
         }
 
-        OpalScheduleFragment scheduleFragment = (OpalScheduleFragment)fm.findFragmentByTag(TAG_SCHEDULE_FRAGMENT);
+        OpalScheduleFragment scheduleFragment = (OpalScheduleFragment) fm.findFragmentByTag(TAG_SCHEDULE_FRAGMENT);
         scheduleFragment.onHandleTimeSlotClicked(v);
 
     }
@@ -767,12 +761,12 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
     public void onWeekdaysClicked(View v) {
         FragmentManager fm = getSupportFragmentManager();
 
-        if(fm != null &
+        if (fm != null &
                 fm.findFragmentByTag(TAG_SCHEDULE_FRAGMENT) == null) {
             return;
         }
 
-        OpalScheduleFragment scheduleFragment = (OpalScheduleFragment)fm.findFragmentByTag(TAG_SCHEDULE_FRAGMENT);
+        OpalScheduleFragment scheduleFragment = (OpalScheduleFragment) fm.findFragmentByTag(TAG_SCHEDULE_FRAGMENT);
         scheduleFragment.onHandleWeekdaysClicked(v);
 
     }
