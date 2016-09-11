@@ -33,6 +33,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.JsonRequest;
 import com.firstbuild.androidapp.OpalValues;
 import com.firstbuild.androidapp.ParagonValues;
 import com.firstbuild.androidapp.R;
@@ -93,8 +98,7 @@ public class DashboardActivity extends AppCompatActivity {
 
             if (status == BleValues.START_SCAN) {
                 Log.d(TAG, "Scanning BLE devices");
-            }
-            else {
+            } else {
                 Log.d(TAG, "Stop scanning BLE devices");
 
             }
@@ -140,10 +144,9 @@ public class DashboardActivity extends AppCompatActivity {
 
                 // According to the spec, Application should send local epoch time to Opal device
                 // after Connection to the GATT server is made
-                if(productInfo.type == ProductInfo.PRODUCT_TYPE_OPAL) {
+                if (productInfo.type == ProductInfo.PRODUCT_TYPE_OPAL) {
                     sendPhoneLocalEpochTimeToOpal(productInfo);
-                }
-                else {
+                } else {
                     // Do nothing
                 }
 
@@ -194,7 +197,7 @@ public class DashboardActivity extends AppCompatActivity {
 
     private void sendPhoneLocalEpochTimeToOpal(ProductInfo product) {
 
-        if(product.bluetoothDevice != null) {
+        if (product.bluetoothDevice != null) {
 
             Log.d(TAG, "[HANS] sendPhoneLocalEpochTimeToOpal : " + product.nickname);
 
@@ -205,7 +208,7 @@ public class DashboardActivity extends AppCompatActivity {
             Long millis = calendar.getTimeInMillis();
             // Get local time from UTC time + Current Zone time + DST
             millis += TimeZone.getDefault().getOffset(millis);
-            Long localTime = millis/1000;
+            Long localTime = millis / 1000;
             //  Long localTime = 1468936790L; This is current time for testing purpose
             //  "13:59:50", i can test if 2pm schedule item works or not within 10 sec
 
@@ -217,8 +220,7 @@ public class DashboardActivity extends AppCompatActivity {
             Log.d(TAG, "[HANS] current local time in buffer array format: " + MathTools.byteArrayToHex(valueBuffer.array()));
 
             BleManager.getInstance().writeCharacteristics(product.bluetoothDevice, OpalValues.OPAL_TIME_SYNC_UUID, valueBuffer.array());
-        }
-        else {
+        } else {
             // Should we reconnect if bluetoothdevice is not available ?
         }
     }
@@ -229,15 +231,12 @@ public class DashboardActivity extends AppCompatActivity {
             if (resultCode == -1) {
                 // Success
                 Log.d(TAG, "Bluetooth adapter is enabled. Start scanning.");
-            }
-            else if (resultCode == 0) {
+            } else if (resultCode == 0) {
                 Log.d(TAG, "Bluetooth adapter is still disabled");
-            }
-            else {
+            } else {
                 // Else
             }
-        }
-        else {
+        } else {
 
         }
     }
@@ -295,8 +294,7 @@ public class DashboardActivity extends AppCompatActivity {
 
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        }
-        else {
+        } else {
             Log.d(TAG, "Bluetooth adapter is already enabled. Start connect");
         }
 
@@ -312,7 +310,7 @@ public class DashboardActivity extends AppCompatActivity {
 
         for (int i = 0; i < size; i++) {
             ProductInfo productInfo = ProductManager.getInstance().getProduct(i);
-            if(productInfo.bluetoothDevice == null) {
+            if (productInfo.bluetoothDevice == null) {
                 productInfo.bluetoothDevice = BleManager.getInstance().connect(productInfo.address);
             }
         }
@@ -330,19 +328,19 @@ public class DashboardActivity extends AppCompatActivity {
      * Must get datas.
      *
      * @param productInfo Object of ProductInfo.
-     * @param readOnly perform read opeartions only
+     * @param readOnly    perform read opeartions only
      */
     private void requestMustHaveData(ProductInfo productInfo, boolean readOnly) {
         if (productInfo.bluetoothDevice != null) {
 
             // read must have characteristics
-            for(String uuid : productInfo.getMustHaveUUIDList()) {
+            for (String uuid : productInfo.getMustHaveUUIDList()) {
                 BleManager.getInstance().readCharacteristics(productInfo.bluetoothDevice, uuid);
             }
 
-            if(readOnly == false) {
+            if (readOnly == false) {
                 // set must-have-notification characteristics
-                for(String uuid : productInfo.getMustHaveNotificationUUIDList()) {
+                for (String uuid : productInfo.getMustHaveNotificationUUIDList()) {
                     BleManager.getInstance().setCharacteristicNotification(productInfo.bluetoothDevice, uuid, true);
                 }
             }
@@ -362,8 +360,7 @@ public class DashboardActivity extends AppCompatActivity {
         if (adapterDashboard.getCount() == 0) {
             layoutNoProduct.setVisibility(View.VISIBLE);
             listViewProduct.setVisibility(View.GONE);
-        }
-        else {
+        } else {
             layoutNoProduct.setVisibility(View.GONE);
             listViewProduct.setVisibility(View.VISIBLE);
         }
@@ -488,43 +485,32 @@ public class DashboardActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String url = "http://morning-badlands-24515.herokuapp.com/contacts";
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("firstName", "bob");
+                params.put("lastName", "smith");
+                params.put("email", "bob@smith.com");
 
-                StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                        new Response.Listener<String>() {
+                JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
+                        new JSONObject(params),
+                        new Response.Listener<JSONObject>() {
                             @Override
-                            public void onResponse(String response) {
-                                try {
-                                    JSONObject jsonResponse = new JSONObject(response).getJSONObject("form");
-                                    String site = jsonResponse.getString("site");
-                                    String network = jsonResponse.getString("network");
-                                    Log.d(TAG, "Site: "+site+"\nNetwork: "+network);
-                                } catch (JSONException e) {
-                                    Log.d(TAG, "onResponse catching exception");
-                                    Log.d(TAG, e.toString());
-                                }
+                            public void onResponse(JSONObject response) {
+                                Log.d(TAG, "GAV - Response from server");
+                                Log.d(TAG, response.toString());
                             }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                Log.d(TAG, "onErrorResponse");
-                                Log.d(TAG, error.toString());
-                                error.printStackTrace();
-                            }
-                        }
-                ) {
+                        }, new Response.ErrorListener() {
                     @Override
-                    protected Map<String, String> getParams()
-                    {
-                        // curl -H "Content-Type: application/json" -d '{"firstName":"Chris", "lastName": "Chang", "email": "support@mlab.com"}' http://morning-badlands-24515.herokuapp.com/contacts
-                        Map<String, String> params = new HashMap<>();
-                        // the POST parameters:
-                        params.put("'firstName'", "'Blah'");
-                        params.put("'lastName'", "'Sheep'");
-                        params.put("'email'", "'apple@pie.com'");
-                        Log.d(TAG, "Params passed to server");
-                        Log.d(TAG, params.toString());
-                        return params;
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, "GAV - Error from volley");
+                        Log.d(TAG, error.toString());
+                    }
+                }) {
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        HashMap<String, String> headers = new HashMap<String, String>();
+                        headers.put("Content-Type", "application/json; charset=utf-8");
+                        headers.put("User-agent", System.getProperty("http.agent"));
+                        return headers;
                     }
                 };
 
@@ -540,8 +526,7 @@ public class DashboardActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
             BleManager.getInstance().removeListener(bleListener);
             finish();
-        }
-        else {
+        } else {
             // Initializes Bluetooth adapter.
             final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
             bluetoothAdapter = bluetoothManager.getAdapter();
@@ -553,8 +538,7 @@ public class DashboardActivity extends AppCompatActivity {
                 Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
                 BleManager.getInstance().removeListener(bleListener);
                 finish();
-            }
-            else {
+            } else {
                 // Do nothing
             }
 
@@ -591,8 +575,7 @@ public class DashboardActivity extends AppCompatActivity {
             startActivity(intent);
 
             cancelBleOperations(true);
-        }
-        else {
+        } else {
             Log.d(TAG, "onItemClicked but error :" + productInfo.type);
         }
 
@@ -600,14 +583,15 @@ public class DashboardActivity extends AppCompatActivity {
 
     /**
      * cancel active BLE operations from the Queue
+     *
      * @param maintainCurrent indicates whether the ble operations pertaining to the current product should be maintained or not
      */
     private void cancelBleOperations(boolean maintainCurrent) {
         ProductInfo currentProduct = ProductManager.getInstance().getCurrent();
 
-        for(ProductInfo p : ProductManager.getInstance().getProducts()) {
+        for (ProductInfo p : ProductManager.getInstance().getProducts()) {
 
-            if(maintainCurrent == true && p.bluetoothDevice.equals(currentProduct.bluetoothDevice))
+            if (maintainCurrent == true && p.bluetoothDevice.equals(currentProduct.bluetoothDevice))
                 continue;
 
             BleManager.getInstance().cancelOperations(p.bluetoothDevice);
@@ -618,7 +602,7 @@ public class DashboardActivity extends AppCompatActivity {
     private Class<?> getTargetActivityClass(int type) {
         Class<?> ret;
 
-        switch(type) {
+        switch (type) {
             case ProductInfo.PRODUCT_TYPE_PARAGON:
                 ret = ParagonMainActivity.class;
                 break;
@@ -762,8 +746,7 @@ public class DashboardActivity extends AppCompatActivity {
                 if (currentProduct.isAllMustDataReceived()) {
                     holderDashboard.layoutProgress.setVisibility(View.GONE);
                     holderDashboard.layoutStatus.setVisibility(View.VISIBLE);
-                }
-                else {
+                } else {
                     holderDashboard.progressBar.setIndeterminate(false);
                     holderDashboard.progressBar.setMax(currentProduct.getNumMustInitData());
                     holderDashboard.progressBar.setProgress(numMustData);
@@ -771,8 +754,7 @@ public class DashboardActivity extends AppCompatActivity {
                     holderDashboard.layoutProgress.setVisibility(View.VISIBLE);
                     holderDashboard.layoutStatus.setVisibility(View.GONE);
                 }
-            }
-            else {
+            } else {
 
                 holderDashboard.progressBar.setIndeterminate(true);
                 holderDashboard.layoutProgress.setVisibility(View.VISIBLE);
