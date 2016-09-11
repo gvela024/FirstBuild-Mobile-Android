@@ -49,12 +49,21 @@ import com.firstbuild.commonframework.blemanager.BleListener;
 import com.firstbuild.commonframework.blemanager.BleManager;
 import com.firstbuild.commonframework.blemanager.BleValues;
 import com.firstbuild.tools.MathTools;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.Volley;
+import com.android.volley.toolbox.StringRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 public class DashboardActivity extends AppCompatActivity {
@@ -475,6 +484,53 @@ public class DashboardActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.fiddleButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String url = "http://morning-badlands-24515.herokuapp.com/contacts";
+
+                StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                try {
+                                    JSONObject jsonResponse = new JSONObject(response).getJSONObject("form");
+                                    String site = jsonResponse.getString("site");
+                                    String network = jsonResponse.getString("network");
+                                    Log.d(TAG, "Site: "+site+"\nNetwork: "+network);
+                                } catch (JSONException e) {
+                                    Log.d(TAG, "onResponse catching exception");
+                                    Log.d(TAG, e.toString());
+                                }
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.d(TAG, "onErrorResponse");
+                                Log.d(TAG, error.toString());
+                                error.printStackTrace();
+                            }
+                        }
+                ) {
+                    @Override
+                    protected Map<String, String> getParams()
+                    {
+                        // curl -H "Content-Type: application/json" -d '{"firstName":"Chris", "lastName": "Chang", "email": "support@mlab.com"}' http://morning-badlands-24515.herokuapp.com/contacts
+                        Map<String, String> params = new HashMap<>();
+                        // the POST parameters:
+                        params.put("'firstName'", "'Blah'");
+                        params.put("'lastName'", "'Sheep'");
+                        params.put("'email'", "'apple@pie.com'");
+                        Log.d(TAG, "Params passed to server");
+                        Log.d(TAG, params.toString());
+                        return params;
+                    }
+                };
+
+                Volley.newRequestQueue(getApplicationContext()).add(postRequest);
+            }
+        });
 
         // Use this check to determine whether BLE is supported on the device. Then
         // you can selectively disable BLE-related features.
