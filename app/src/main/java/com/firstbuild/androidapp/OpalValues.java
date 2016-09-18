@@ -38,6 +38,16 @@ public class OpalValues {
     public static final String OPAL_FILTER_INSTALL_CHAR_UUID = "9BFDF2DD-E92C-468C-996B-F2EB95AA9325";
     public static final String OPAL_PUMP_CYCLE_CHAR_UUID = "6AF78DF8-629C-490E-9D42-100E84915753";
 
+    // Opal log stuff
+    public static final String OpalLogIndex = "1F122C31-D1EA-447D-8409-56196DF130D2";
+    public static final String OpalLog0 = "1CE417B2-5BE0-4D4F-99C6-4086F49AE901";
+    public static final String OpalLog1 = "3E2D48C7-0336-40D7-B281-E5C5F70366B8";
+    public static final String OpalLog2 = "21959717-F8D2-46ED-925E-FCDFEB666F65";
+    public static final String OpalLog3 = "EC780A17-1E86-4633-8BB7-4AD614413942";
+    public static final String OpalLog4 = "06124193-F87C-49F3-AB44-59AA1DBA82F1";
+    public static final String OpalLog5 = "21D3FDBB-5C1D-4ACE-9578-7D3D3CEBA147";
+    public static final String OpalLog6 = "352DDEA3-79F7-410F-B5B5-4D3F96DC510D";
+
     // OTA Upgrade Service UUID
     public static final String OPAL_OTA_UPGRADE_SERVICE_UUID = "E936877A-8DD0-FAA7-B648-F46ACDA1F27B";
     public static final String OPAL_OTA_CONTROL_COMMAND_CHAR_UUID = "4FB34AB1-6207-E5A0-484F-E24A7F638FFF";

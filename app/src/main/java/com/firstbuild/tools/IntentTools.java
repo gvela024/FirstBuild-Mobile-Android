@@ -1,16 +1,11 @@
 package com.firstbuild.tools;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
 
 import com.firstbuild.androidapp.dashboard.DashboardActivity;
 
-/**
- * Created by hans on 16. 7. 4..
- */
 public class IntentTools {
 
     public static final String OPAL_INTRODUCTION_HOME_URL = "http://www.nuggetice.com";
@@ -43,7 +38,7 @@ public class IntentTools {
 
     public static void composeEmail(Context c, String[] addresses, String subject) {
         Intent intent = new Intent(Intent.ACTION_SENDTO);
-        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+        intent.setData(Uri.parse("mailto:"));
         intent.putExtra(Intent.EXTRA_EMAIL, addresses);
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -562,7 +562,7 @@ public class BleManager {
 
         if(isBleOperationExisting(read) == false) {
             operationQ.offer(read);
-        }else {
+        } else {
             // Don't add as there is already same operation in the Q
             Log.d(TAG, "readCharacteristics : current operation is already queued !");
         }

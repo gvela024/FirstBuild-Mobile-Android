@@ -481,43 +481,6 @@ public class DashboardActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.fiddleButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String url = "http://morning-badlands-24515.herokuapp.com/contacts";
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("firstName", "bob");
-                params.put("lastName", "smith");
-                params.put("email", "bob@smith.com");
-
-                JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
-                        new JSONObject(params),
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                Log.d(TAG, "GAV - Response from server");
-                                Log.d(TAG, response.toString());
-                            }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d(TAG, "GAV - Error from volley");
-                        Log.d(TAG, error.toString());
-                    }
-                }) {
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        HashMap<String, String> headers = new HashMap<String, String>();
-                        headers.put("Content-Type", "application/json; charset=utf-8");
-                        headers.put("User-agent", System.getProperty("http.agent"));
-                        return headers;
-                    }
-                };
-
-                Volley.newRequestQueue(getApplicationContext()).add(postRequest);
-            }
-        });
-
         // Use this check to determine whether BLE is supported on the device. Then
         // you can selectively disable BLE-related features.
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
