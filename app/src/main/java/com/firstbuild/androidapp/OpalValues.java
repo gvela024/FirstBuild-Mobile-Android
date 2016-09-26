@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by hans on 16. 5. 31..
@@ -39,6 +40,8 @@ public class OpalValues {
     public static final String OPAL_PUMP_CYCLE_CHAR_UUID = "6AF78DF8-629C-490E-9D42-100E84915753";
 
     // Opal log stuff
+    // fixme Would be nice if I could make a key value map here
+//    public static final HashMap<int, String> OpalLog = new HashMap<>()
     public static final String OpalLogIndex = "1F122C31-D1EA-447D-8409-56196DF130D2";
     public static final String OpalLog0 = "1CE417B2-5BE0-4D4F-99C6-4086F49AE901";
     public static final String OpalLog1 = "3E2D48C7-0336-40D7-B281-E5C5F70366B8";

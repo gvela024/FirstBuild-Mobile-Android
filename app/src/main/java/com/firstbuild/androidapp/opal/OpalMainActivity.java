@@ -209,12 +209,11 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
             ProductInfo productInfo = ProductManager.getInstance().getCurrent();
 
             if (address.equals(productInfo.address)) {
-                Log.d(TAG, "[HANS][onCharacteristicRead] address: " + address + ", uuid: " + uuid + " value : " + MathTools.byteArrayToHex(value));
+                Log.d(TAG, "[onCharacteristicRead] address: " + address + ", uuid: " + uuid + " value : " + MathTools.byteArrayToHex(value));
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-
                         // If version information is read, update version UI in navigation view if possible
                         if (uuid.equalsIgnoreCase(OpalValues.OPAL_FIRMWARE_VERSION_CHAR_UUID) ||
                                 uuid.equalsIgnoreCase(OpalValues.OPAL_OTA_BT_VERSION_CHAR_UUID)) {
@@ -228,10 +227,12 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
                             // Do nothing
                         }
 
-                        Log.d(TAG, "Gabe - I hope that I get here. Going to try to read the charactistic");
-                        if (uuid.equalsIgnoreCase(OpalValues.OpalLog0)) {
-                            Log.d(TAG, "I hope this works: " + MathTools.byteArrayToHex(value));
+                        if (UuidIsOneOfTheDiagnosticLogs(uuid)) {
+
                         }
+//                        if (uuid.equalsIgnoreCase(OpalValues.OpalLog0)) {
+//                            Log.d(TAG, "I hope this works: " + MathTools.byteArrayToHex(value));
+//                        }
                     }
                 });
             }
@@ -308,6 +309,17 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
             }
         }
     };
+
+    private boolean UuidIsOneOfTheDiagnosticLogs(final String uuid) {
+        return uuid.equalsIgnoreCase(OpalValues.OpalLog0) ||
+                uuid.equalsIgnoreCase(OpalValues.OpalLog1) ||
+                uuid.equalsIgnoreCase(OpalValues.OpalLog2) ||
+                uuid.equalsIgnoreCase(OpalValues.OpalLog3) ||
+                uuid.equalsIgnoreCase(OpalValues.OpalLog4) ||
+                uuid.equalsIgnoreCase(OpalValues.OpalLog5) ||
+                uuid.equalsIgnoreCase(OpalValues.OpalLog6) ||
+                uuid.equalsIgnoreCase(OpalValues.OpalLogIndex);
+    }
 
     private void checkOtaProgressOnDisconnected() {
 
