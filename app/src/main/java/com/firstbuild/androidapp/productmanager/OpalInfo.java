@@ -182,7 +182,7 @@ public class OpalInfo extends ProductInfo{
                 break;
 
             default:
-                Log.d(TAG, "[NOT UPDATING in APP]UUID to update : " + uuid + "   value to update : " + MathTools.byteArrayToHex(byteBuffer.array()));
+//                Log.d(TAG, "[NOT UPDATING in APP]UUID to update : " + uuid + "   value to update : " + MathTools.byteArrayToHex(byteBuffer.array()));
                 break;
         }
     }

@@ -158,7 +158,7 @@ public class OpalMainFragment extends Fragment {
                 break;
 
             default:
-                Log.d(TAG, "onOpalDataChanged : Not Handled ! : uuid : " + uuid + " value : " + MathTools.byteArrayToHex(value));
+//                Log.d(TAG, "onOpalDataChanged : Not Handled ! : uuid : " + uuid + " value : " + MathTools.byteArrayToHex(value));
                 break;
         }
     }

@@ -173,7 +173,7 @@ public class DashboardActivity extends AppCompatActivity {
         public void onCharacteristicWrite(String address, String uuid, byte[] value, int status) {
             super.onCharacteristicWrite(address, uuid, value, status);
 
-            Log.d(TAG, "[onCharacteristicWrite] address: " + address + ", uuid: " + uuid);
+//            Log.d(TAG, "[onCharacteristicWrite] address: " + address + ", uuid: " + uuid);
 
         }
 
@@ -191,7 +191,7 @@ public class DashboardActivity extends AppCompatActivity {
         public void onDescriptorWrite(String address, String uuid, byte[] value, int status) {
             super.onDescriptorWrite(address, uuid, value, status);
 
-            Log.d(TAG, "[onDescriptorWrite] address: " + address + ", uuid: " + uuid + ", value : " + MathTools.byteArrayToHex(value) + ", status" + status);
+//            Log.d(TAG, "[onDescriptorWrite] address: " + address + ", uuid: " + uuid + ", value : " + MathTools.byteArrayToHex(value) + ", status" + status);
         }
     };
 
@@ -199,7 +199,7 @@ public class DashboardActivity extends AppCompatActivity {
 
         if (product.bluetoothDevice != null) {
 
-            Log.d(TAG, "[HANS] sendPhoneLocalEpochTimeToOpal : " + product.nickname);
+//            Log.d(TAG, "[HANS] sendPhoneLocalEpochTimeToOpal : " + product.nickname);
 
             ByteBuffer valueBuffer = ByteBuffer.allocate(4);
 

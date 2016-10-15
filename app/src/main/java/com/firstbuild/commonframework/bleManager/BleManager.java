@@ -182,7 +182,7 @@ public class BleManager {
 
             // Retrieves uuid and value
             String uuid = characteristic.getUuid().toString();
-            Log.d(TAG, "Read Characteristic UUID: " + uuid);
+//            Log.d(TAG, "Read Characteristic UUID: " + uuid);
 
             byte[] value = characteristic.getValue();
             if (value != null) {
@@ -206,7 +206,7 @@ public class BleManager {
 
             // Retrieves uuid and value
             String uuid = characteristic.getUuid().toString();
-            Log.d(TAG, "Write Characteristic UUID: " + uuid + "    status : " + status);
+//            Log.d(TAG, "Write Characteristic UUID: " + uuid + "    status : " + status);
 
             byte[] value = characteristic.getValue();
             printGattValue(value);
@@ -227,7 +227,7 @@ public class BleManager {
 
             // Retrieves uuid and value
             String uuid = characteristic.getUuid().toString();
-            Log.d(TAG, "Characteristic UUID: " + uuid);
+//            Log.d(TAG, "Characteristic UUID: " + uuid);
 
             byte[] value = characteristic.getValue();
             printGattValue(value);
@@ -246,7 +246,7 @@ public class BleManager {
 
             // Retrieves uuid and value
             String uuid = descriptor.getUuid().toString();
-            Log.d(TAG, "Characteristic UUID: " + uuid);
+//            Log.d(TAG, "Characteristic UUID: " + uuid);
 
             byte[] value = descriptor.getValue();
 
@@ -534,9 +534,9 @@ public class BleManager {
                 // Loops through available Characteristics.
                 for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
                     String CharacteristicUuid = gattCharacteristic.getUuid().toString();
-                    Log.d(TAG, "Characteristic UUID: " + CharacteristicUuid +
-                            ", Permission: " + gattCharacteristic.getPermissions() +
-                            ", Write Type: " + gattCharacteristic.getWriteType());
+//                    Log.d(TAG, "Characteristic UUID: " + CharacteristicUuid +
+//                            ", Permission: " + gattCharacteristic.getPermissions() +
+//                            ", Write Type: " + gattCharacteristic.getWriteType());
 
                     if (gattCharacteristic.getValue() != null) {
                         printGattValue(gattCharacteristic.getValue());

@@ -22,6 +22,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.firstbuild.androidapp.FirstBuildApplication;
 import com.firstbuild.androidapp.OpalValues;
 import com.firstbuild.androidapp.R;
@@ -37,8 +43,11 @@ import com.firstbuild.tools.MathTools;
 import com.firstbuild.viewutil.OTAConfirmDialogFragment;
 import com.firstbuild.viewutil.ProgressDialogFragment;
 
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDialogFragment.OTAUpdateStartDelegate {
 
@@ -154,19 +163,19 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
         public void onScanDevices(HashMap<String, BluetoothDevice> bluetoothDevices) {
             super.onScanDevices(bluetoothDevices);
 
-            Log.d(TAG, "onScanDevices IN");
+//            Log.d(TAG, "onScanDevices IN");
         }
 
         @Override
         public void onScanStateChanged(int status) {
             super.onScanStateChanged(status);
 
-            Log.d(TAG, "[onScanStateChanged] status: " + status);
+//            Log.d(TAG, "[onScanStateChanged] status: " + status);
 
             if (status == BleValues.START_SCAN) {
-                Log.d(TAG, "Scanning BLE devices");
+//                Log.d(TAG, "Scanning BLE devices");
             } else {
-                Log.d(TAG, "Stop scanning BLE devices");
+//                Log.d(TAG, "Stop scanning BLE devices");
             }
         }
 
@@ -174,12 +183,12 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
         public void onConnectionStateChanged(final String address, final int status) {
             super.onConnectionStateChanged(address, status);
 
-            Log.d(TAG, "[onConnectionStateChanged] address: " + address + ", status: " + status);
+//            Log.d(TAG, "[onConnectionStateChanged] address: " + address + ", status: " + status);
 
             final ProductInfo productInfo = ProductManager.getInstance().getCurrent();
 
             if (address.equals(productInfo.address)) {
-                Log.d(TAG, "[onConnectionStateChanged] address: " + address + ", status: " + status);
+//                Log.d(TAG, "[onConnectionStateChanged] address: " + address + ", status: " + status);
 
                 if (status == BluetoothProfile.STATE_CONNECTED) {
                     // TODO: needs testing for corner case handling
@@ -199,7 +208,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
         public void onServicesDiscovered(String address, List<BluetoothGattService> bleGattServices) {
             super.onServicesDiscovered(address, bleGattServices);
 
-            Log.d(TAG, "[onServicesDiscovered] address: " + address);
+//            Log.d(TAG, "[onServicesDiscovered] address: " + address);
         }
 
         @Override
@@ -209,7 +218,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
             ProductInfo productInfo = ProductManager.getInstance().getCurrent();
 
             if (address.equals(productInfo.address)) {
-                Log.d(TAG, "[onCharacteristicRead] address: " + address + ", uuid: " + uuid + " value : " + MathTools.byteArrayToHex(value));
+//                Log.d(TAG, "[onCharacteristicRead] address: " + address + ", uuid: " + uuid + " value : " + MathTools.byteArrayToHex(value));
 
                 runOnUiThread(new Runnable() {
                     @Override
@@ -228,11 +237,43 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
                         }
 
                         if (UuidIsOneOfTheDiagnosticLogs(uuid)) {
+                            String logIndex = GetOpalDiagnosticKey(uuid);
+                            String logData = MathTools.byteArrayToHex(value).toString();
 
+                            String url = "http://morning-badlands-24515.herokuapp.com/devices";
+                            Map<String, String> params = new HashMap<String, String>();
+                            params.put("identifier", "1234");
+                            params.put(logIndex, logData);
+
+                            Log.d(TAG, "index:\t" + logIndex);
+                            Log.d(TAG, "data:\t" + logData);
+
+                            JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
+                                    new JSONObject(params),
+                                    new Response.Listener<JSONObject>() {
+                                        @Override
+                                        public void onResponse(JSONObject response) {
+                                            Log.d(TAG, "GAV - Response from server");
+                                            Log.d(TAG, response.toString());
+                                        }
+                                    }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.d(TAG, "GAV - Error from volley");
+                                    Log.d(TAG, error.toString());
+                                }
+                            }) {
+                                @Override
+                                public Map<String, String> getHeaders() throws AuthFailureError {
+                                    HashMap<String, String> headers = new HashMap<String, String>();
+                                    headers.put("Content-Type", "application/json; charset=utf-8");
+                                    headers.put("User-agent", System.getProperty("http.agent"));
+                                    return headers;
+                                }
+                            };
+
+                            Volley.newRequestQueue(getApplicationContext()).add(postRequest);
                         }
-//                        if (uuid.equalsIgnoreCase(OpalValues.OpalLog0)) {
-//                            Log.d(TAG, "I hope this works: " + MathTools.byteArrayToHex(value));
-//                        }
                     }
                 });
             }
@@ -246,7 +287,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
 
             if (address.equals(productInfo.address)) {
 
-                Log.d(TAG, "[HANS][onCharacteristicWrite] uuid: " + uuid + ", value: " + MathTools.byteArrayToHex(value) + ", status : " + status);
+//                Log.d(TAG, "[HANS][onCharacteristicWrite] uuid: " + uuid + ", value: " + MathTools.byteArrayToHex(value) + ", status : " + status);
 
                 OtaManager.getInstance().onHandleWriteResponse(uuid, status);
 
@@ -280,7 +321,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
             ProductInfo productInfo = ProductManager.getInstance().getCurrent();
             if (address.equals(productInfo.address)) {
 
-                Log.d(TAG, "[HANS][onCharacteristicChanged] : uuid: " + uuid + ", value: " + MathTools.byteArrayToHex(value));
+//                Log.d(TAG, "[HANS][onCharacteristicChanged] : uuid: " + uuid + ", value: " + MathTools.byteArrayToHex(value));
 
                 OtaManager.getInstance().onHandleNotification(uuid, value);
 
@@ -305,7 +346,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
             ProductInfo productInfo = ProductManager.getInstance().getCurrent();
 
             if (address.equals(productInfo.address)) {
-                Log.d(TAG, "[HANS][onDescriptorWrite] : uuid: " + uuid + ", value: " + MathTools.byteArrayToHex(value));
+//                Log.d(TAG, "[HANS][onDescriptorWrite] : uuid: " + uuid + ", value: " + MathTools.byteArrayToHex(value));
             }
         }
     };
@@ -336,13 +377,13 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
     private void onUpdateVersion() {
         if (currentNavItemId == R.id.nav_item_about) {
 
-            Log.d(TAG, "[HANS][onUpdateVersion] : Updating version UI");
+//            Log.d(TAG, "[HANS][onUpdateVersion] : Updating version UI");
 
             opalFirmwareTv.setText(opalInfo.getFirmWareVersion());
             bleFirmwareTv.setText(opalInfo.getBTVersion());
 
         } else {
-            Log.d(TAG, "[HANS][onUpdateVersion] : About UI is not visible so skip updating it");
+//            Log.d(TAG, "[HANS][onUpdateVersion] : About UI is not visible so skip updating it");
         }
     }
 
@@ -381,14 +422,13 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
         opalInfo = (OpalInfo) ProductManager.getInstance().getCurrent();
 
         checkBleAvailability();
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        Log.d(TAG, "onResume() IN");
+//        Log.d(TAG, "onResume() IN");
 
         checkBleAvailability();
 
@@ -404,12 +444,33 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
     protected void onDestroy() {
         super.onDestroy();
 
-        Log.d(TAG, "onDestroy() IN");
+//        Log.d(TAG, "onDestroy() IN");
 
         // remove ble listener
         BleManager.getInstance().removeListener(bleListener);
     }
 
+    private String GetOpalDiagnosticKey(String uuid) {
+        if (uuid.compareToIgnoreCase(OpalValues.OpalLogIndex) == 0) {
+            return "OpalLogIndex";
+        } else if (uuid.compareToIgnoreCase(OpalValues.OpalLog0) == 0) {
+            return "OpalLog0";
+        } else if (uuid.compareToIgnoreCase(OpalValues.OpalLog1) == 0) {
+            return "OpalLog1";
+        } else if (uuid.compareToIgnoreCase(OpalValues.OpalLog2) == 0) {
+            return "OpalLog2";
+        } else if (uuid.compareToIgnoreCase(OpalValues.OpalLog3) == 0) {
+            return "OpalLog3";
+        } else if (uuid.compareToIgnoreCase(OpalValues.OpalLog4) == 0) {
+            return "OpalLog4";
+        } else if (uuid.compareToIgnoreCase(OpalValues.OpalLog5) == 0) {
+            return "OpalLog5";
+        } else if (uuid.compareToIgnoreCase(OpalValues.OpalLog6) == 0) {
+            return "OpalLog6";
+        } else {
+            return "Whoops";
+        }
+    }
 
     private void setupNavigationView() {
         // navigation_view
@@ -481,7 +542,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
                         break;
 
                     default:
-                        Log.d(TAG, "onNavigationItemSelected : unknown menu id : " + item.getItemId());
+//                        Log.d(TAG, "onNavigationItemSelected : unknown menu id : " + item.getItemId());
                         break;
                 }
 
@@ -721,11 +782,11 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
         boolean result = BleManager.getInstance().isBluetoothEnabled();
 
         if (!result) {
-            Log.d(TAG, "Bluetooth adapter is disabled. Enable bluetooth adapter.");
+//            Log.d(TAG, "Bluetooth adapter is disabled. Enable bluetooth adapter.");
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         } else {
-            Log.d(TAG, "Bluetooth adapter is already enabled. Start connect");
+//            Log.d(TAG, "Bluetooth adapter is already enabled. Start connect");
         }
     }
 
