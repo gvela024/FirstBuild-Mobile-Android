@@ -249,7 +249,7 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
                                 e.printStackTrace();
                             }
 
-                            if (AllOpalLogsAreCompiled(logIndex)) {
+                            if (AllOpalLogsAreCompiled()) {
                                 Log.d(TAG, "MADE IT HERE WOOOOOOOOO");
 //                            String url = "http://morning-badlands-24515.herokuapp.com/devices";
                                 String url = "https://opal-feedback.herokuapp.com/api/v1/opal/log/1234";
@@ -369,11 +369,13 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
                 uuid.equalsIgnoreCase(OpalValues.OpalLogIndex);
     }
 
-    private boolean AllOpalLogsAreCompiled(String opalLogIndex) {
-        if (!UuidIsOneOfTheDiagnosticLogs(opalLogIndex) && opalLogIndex != "OpalLog6") {
+    private boolean AllOpalLogsAreCompiled() {
+        if (opalLogs.length() == 8) {
+            return true;
+        }
+        else {
             return false;
         }
-        return true;
     }
 
     private void checkOtaProgressOnDisconnected() {
