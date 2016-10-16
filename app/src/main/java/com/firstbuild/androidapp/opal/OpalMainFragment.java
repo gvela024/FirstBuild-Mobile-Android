@@ -59,7 +59,7 @@ public class OpalMainFragment extends Fragment {
         // Setting current schedule en/disable mode
         scheduleSwitch.setChecked(currentOpalInfo.getIsScheduleEnabledValue() == OpalValues.OPAL_ENABLE_SCHEDULE ? true : false);
 
-        // Configure visibilitiy of Make/Stop Ice button
+        // Configure visibility of Make/Stop Ice button
         makeIceBtn.setVisibility(currentOpalInfo.isMakingIceButtonVisible() ? View.VISIBLE : View.GONE);
 
         // Configure Make/Stop Ice button's text
@@ -158,7 +158,7 @@ public class OpalMainFragment extends Fragment {
                 break;
 
             default:
-                Log.d(TAG, "onOpalDataChanged : Not Handled ! : uuid : " + uuid + " value : " + MathTools.byteArrayToHex(value));
+//                Log.d(TAG, "onOpalDataChanged : Not Handled ! : uuid : " + uuid + " value : " + MathTools.byteArrayToHex(value));
                 break;
         }
     }

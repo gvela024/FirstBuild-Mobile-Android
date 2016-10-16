@@ -208,7 +208,7 @@ public class ParagonMainActivity extends AppCompatActivity {
             if (address.equals(productInfo.address)) {
                 final int ret = (int) value[0];
 
-                Log.d(TAG, "[onCharacteristicWrite] uuid: " + uuid + ", value: " + String.format("%02x", value[0]));
+//                Log.d(TAG, "[onCharacteristicWrite] uuid: " + uuid + ", value: " + String.format("%02x", value[0]));
 
                 onWriteData(uuid, value);
             }
@@ -233,7 +233,7 @@ public class ParagonMainActivity extends AppCompatActivity {
             ProductInfo productInfo = ProductManager.getInstance().getCurrent();
 
             if (address.equals(productInfo.address)) {
-                Log.d(TAG, "[onDescriptorWrite] address: " + address + ", uuid: " + uuid);
+//                Log.d(TAG, "[onDescriptorWrite] address: " + address + ", uuid: " + uuid);
 
             }
 

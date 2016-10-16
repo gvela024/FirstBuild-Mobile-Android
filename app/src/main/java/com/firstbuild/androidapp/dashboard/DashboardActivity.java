@@ -33,6 +33,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.JsonRequest;
 import com.firstbuild.androidapp.OpalValues;
 import com.firstbuild.androidapp.ParagonValues;
 import com.firstbuild.androidapp.R;
@@ -49,12 +54,21 @@ import com.firstbuild.commonframework.blemanager.BleListener;
 import com.firstbuild.commonframework.blemanager.BleManager;
 import com.firstbuild.commonframework.blemanager.BleValues;
 import com.firstbuild.tools.MathTools;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.Volley;
+import com.android.volley.toolbox.StringRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 public class DashboardActivity extends AppCompatActivity {
@@ -84,8 +98,7 @@ public class DashboardActivity extends AppCompatActivity {
 
             if (status == BleValues.START_SCAN) {
                 Log.d(TAG, "Scanning BLE devices");
-            }
-            else {
+            } else {
                 Log.d(TAG, "Stop scanning BLE devices");
 
             }
@@ -131,10 +144,9 @@ public class DashboardActivity extends AppCompatActivity {
 
                 // According to the spec, Application should send local epoch time to Opal device
                 // after Connection to the GATT server is made
-                if(productInfo.type == ProductInfo.PRODUCT_TYPE_OPAL) {
+                if (productInfo.type == ProductInfo.PRODUCT_TYPE_OPAL) {
                     sendPhoneLocalEpochTimeToOpal(productInfo);
-                }
-                else {
+                } else {
                     // Do nothing
                 }
 
@@ -161,7 +173,7 @@ public class DashboardActivity extends AppCompatActivity {
         public void onCharacteristicWrite(String address, String uuid, byte[] value, int status) {
             super.onCharacteristicWrite(address, uuid, value, status);
 
-            Log.d(TAG, "[onCharacteristicWrite] address: " + address + ", uuid: " + uuid);
+//            Log.d(TAG, "[onCharacteristicWrite] address: " + address + ", uuid: " + uuid);
 
         }
 
@@ -179,15 +191,15 @@ public class DashboardActivity extends AppCompatActivity {
         public void onDescriptorWrite(String address, String uuid, byte[] value, int status) {
             super.onDescriptorWrite(address, uuid, value, status);
 
-            Log.d(TAG, "[onDescriptorWrite] address: " + address + ", uuid: " + uuid + ", value : " + MathTools.byteArrayToHex(value) + ", status" + status);
+//            Log.d(TAG, "[onDescriptorWrite] address: " + address + ", uuid: " + uuid + ", value : " + MathTools.byteArrayToHex(value) + ", status" + status);
         }
     };
 
     private void sendPhoneLocalEpochTimeToOpal(ProductInfo product) {
 
-        if(product.bluetoothDevice != null) {
+        if (product.bluetoothDevice != null) {
 
-            Log.d(TAG, "[HANS] sendPhoneLocalEpochTimeToOpal : " + product.nickname);
+//            Log.d(TAG, "[HANS] sendPhoneLocalEpochTimeToOpal : " + product.nickname);
 
             ByteBuffer valueBuffer = ByteBuffer.allocate(4);
 
@@ -196,7 +208,7 @@ public class DashboardActivity extends AppCompatActivity {
             Long millis = calendar.getTimeInMillis();
             // Get local time from UTC time + Current Zone time + DST
             millis += TimeZone.getDefault().getOffset(millis);
-            Long localTime = millis/1000;
+            Long localTime = millis / 1000;
             //  Long localTime = 1468936790L; This is current time for testing purpose
             //  "13:59:50", i can test if 2pm schedule item works or not within 10 sec
 
@@ -208,8 +220,7 @@ public class DashboardActivity extends AppCompatActivity {
             Log.d(TAG, "[HANS] current local time in buffer array format: " + MathTools.byteArrayToHex(valueBuffer.array()));
 
             BleManager.getInstance().writeCharacteristics(product.bluetoothDevice, OpalValues.OPAL_TIME_SYNC_UUID, valueBuffer.array());
-        }
-        else {
+        } else {
             // Should we reconnect if bluetoothdevice is not available ?
         }
     }
@@ -220,15 +231,12 @@ public class DashboardActivity extends AppCompatActivity {
             if (resultCode == -1) {
                 // Success
                 Log.d(TAG, "Bluetooth adapter is enabled. Start scanning.");
-            }
-            else if (resultCode == 0) {
+            } else if (resultCode == 0) {
                 Log.d(TAG, "Bluetooth adapter is still disabled");
-            }
-            else {
+            } else {
                 // Else
             }
-        }
-        else {
+        } else {
 
         }
     }
@@ -286,8 +294,7 @@ public class DashboardActivity extends AppCompatActivity {
 
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        }
-        else {
+        } else {
             Log.d(TAG, "Bluetooth adapter is already enabled. Start connect");
         }
 
@@ -303,7 +310,7 @@ public class DashboardActivity extends AppCompatActivity {
 
         for (int i = 0; i < size; i++) {
             ProductInfo productInfo = ProductManager.getInstance().getProduct(i);
-            if(productInfo.bluetoothDevice == null) {
+            if (productInfo.bluetoothDevice == null) {
                 productInfo.bluetoothDevice = BleManager.getInstance().connect(productInfo.address);
             }
         }
@@ -321,19 +328,19 @@ public class DashboardActivity extends AppCompatActivity {
      * Must get datas.
      *
      * @param productInfo Object of ProductInfo.
-     * @param readOnly perform read opeartions only
+     * @param readOnly    perform read opeartions only
      */
     private void requestMustHaveData(ProductInfo productInfo, boolean readOnly) {
         if (productInfo.bluetoothDevice != null) {
 
             // read must have characteristics
-            for(String uuid : productInfo.getMustHaveUUIDList()) {
+            for (String uuid : productInfo.getMustHaveUUIDList()) {
                 BleManager.getInstance().readCharacteristics(productInfo.bluetoothDevice, uuid);
             }
 
-            if(readOnly == false) {
+            if (readOnly == false) {
                 // set must-have-notification characteristics
-                for(String uuid : productInfo.getMustHaveNotificationUUIDList()) {
+                for (String uuid : productInfo.getMustHaveNotificationUUIDList()) {
                     BleManager.getInstance().setCharacteristicNotification(productInfo.bluetoothDevice, uuid, true);
                 }
             }
@@ -353,8 +360,7 @@ public class DashboardActivity extends AppCompatActivity {
         if (adapterDashboard.getCount() == 0) {
             layoutNoProduct.setVisibility(View.VISIBLE);
             listViewProduct.setVisibility(View.GONE);
-        }
-        else {
+        } else {
             layoutNoProduct.setVisibility(View.GONE);
             listViewProduct.setVisibility(View.VISIBLE);
         }
@@ -475,7 +481,6 @@ public class DashboardActivity extends AppCompatActivity {
             }
         });
 
-
         // Use this check to determine whether BLE is supported on the device. Then
         // you can selectively disable BLE-related features.
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -484,8 +489,7 @@ public class DashboardActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
             BleManager.getInstance().removeListener(bleListener);
             finish();
-        }
-        else {
+        } else {
             // Initializes Bluetooth adapter.
             final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
             bluetoothAdapter = bluetoothManager.getAdapter();
@@ -497,8 +501,7 @@ public class DashboardActivity extends AppCompatActivity {
                 Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
                 BleManager.getInstance().removeListener(bleListener);
                 finish();
-            }
-            else {
+            } else {
                 // Do nothing
             }
 
@@ -535,8 +538,7 @@ public class DashboardActivity extends AppCompatActivity {
             startActivity(intent);
 
             cancelBleOperations(true);
-        }
-        else {
+        } else {
             Log.d(TAG, "onItemClicked but error :" + productInfo.type);
         }
 
@@ -544,14 +546,15 @@ public class DashboardActivity extends AppCompatActivity {
 
     /**
      * cancel active BLE operations from the Queue
+     *
      * @param maintainCurrent indicates whether the ble operations pertaining to the current product should be maintained or not
      */
     private void cancelBleOperations(boolean maintainCurrent) {
         ProductInfo currentProduct = ProductManager.getInstance().getCurrent();
 
-        for(ProductInfo p : ProductManager.getInstance().getProducts()) {
+        for (ProductInfo p : ProductManager.getInstance().getProducts()) {
 
-            if(maintainCurrent == true && p.bluetoothDevice.equals(currentProduct.bluetoothDevice))
+            if (maintainCurrent == true && p.bluetoothDevice.equals(currentProduct.bluetoothDevice))
                 continue;
 
             BleManager.getInstance().cancelOperations(p.bluetoothDevice);
@@ -562,7 +565,7 @@ public class DashboardActivity extends AppCompatActivity {
     private Class<?> getTargetActivityClass(int type) {
         Class<?> ret;
 
-        switch(type) {
+        switch (type) {
             case ProductInfo.PRODUCT_TYPE_PARAGON:
                 ret = ParagonMainActivity.class;
                 break;
@@ -706,8 +709,7 @@ public class DashboardActivity extends AppCompatActivity {
                 if (currentProduct.isAllMustDataReceived()) {
                     holderDashboard.layoutProgress.setVisibility(View.GONE);
                     holderDashboard.layoutStatus.setVisibility(View.VISIBLE);
-                }
-                else {
+                } else {
                     holderDashboard.progressBar.setIndeterminate(false);
                     holderDashboard.progressBar.setMax(currentProduct.getNumMustInitData());
                     holderDashboard.progressBar.setProgress(numMustData);
@@ -715,8 +717,7 @@ public class DashboardActivity extends AppCompatActivity {
                     holderDashboard.layoutProgress.setVisibility(View.VISIBLE);
                     holderDashboard.layoutStatus.setVisibility(View.GONE);
                 }
-            }
-            else {
+            } else {
 
                 holderDashboard.progressBar.setIndeterminate(true);
                 holderDashboard.layoutProgress.setVisibility(View.VISIBLE);
