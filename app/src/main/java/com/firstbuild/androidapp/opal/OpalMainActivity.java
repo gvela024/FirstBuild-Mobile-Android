@@ -43,6 +43,7 @@ import com.firstbuild.tools.MathTools;
 import com.firstbuild.viewutil.OTAConfirmDialogFragment;
 import com.firstbuild.viewutil.ProgressDialogFragment;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -92,6 +93,8 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
 
     private OpalInfo opalInfo;
     private int currentNavItemId;
+
+    private JSONObject opalLogs = new JSONObject();
 
     private OTAResultDelegate otaResultDelegate = new OTAResultDelegate() {
         @Override
@@ -240,39 +243,43 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
                             String logIndex = GetOpalDiagnosticKey(uuid);
                             String logData = MathTools.byteArrayToHex(value).toString();
 
-                            String url = "http://morning-badlands-24515.herokuapp.com/devices";
-                            Map<String, String> params = new HashMap<String, String>();
-                            params.put("identifier", "1234");
-                            params.put(logIndex, logData);
+                            try {
+                                opalLogs.put(logIndex, logData);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
 
-                            Log.d(TAG, "index:\t" + logIndex);
-                            Log.d(TAG, "data:\t" + logData);
+                            if (AllOpalLogsAreCompiled(logIndex)) {
+                                Log.d(TAG, "MADE IT HERE WOOOOOOOOO");
+//                            String url = "http://morning-badlands-24515.herokuapp.com/devices";
+                                String url = "https://opal-feedback.herokuapp.com/api/v1/opal/log/1234";
 
-                            JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
-                                    new JSONObject(params),
-                                    new Response.Listener<JSONObject>() {
-                                        @Override
-                                        public void onResponse(JSONObject response) {
-                                            Log.d(TAG, "GAV - Response from server");
-                                            Log.d(TAG, response.toString());
-                                        }
-                                    }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    Log.d(TAG, "GAV - Error from volley");
-                                    Log.d(TAG, error.toString());
-                                }
-                            }) {
-                                @Override
-                                public Map<String, String> getHeaders() throws AuthFailureError {
-                                    HashMap<String, String> headers = new HashMap<String, String>();
-                                    headers.put("Content-Type", "application/json; charset=utf-8");
-                                    headers.put("User-agent", System.getProperty("http.agent"));
-                                    return headers;
-                                }
-                            };
+                                JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.POST, url,
+                                        opalLogs,
+                                        new Response.Listener<JSONObject>() {
+                                            @Override
+                                            public void onResponse(JSONObject response) {
+                                                Log.d(TAG, "GAV - Response from server");
+                                                Log.d(TAG, response.toString());
+                                            }
+                                        }, new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        Log.d(TAG, "GAV - Error from volley");
+                                        Log.d(TAG, error.toString());
+                                    }
+                                }) {
+                                    @Override
+                                    public Map<String, String> getHeaders() throws AuthFailureError {
+                                        HashMap<String, String> headers = new HashMap<String, String>();
+                                        headers.put("Content-Type", "application/json; charset=utf-8");
+                                        headers.put("User-agent", System.getProperty("http.agent"));
+                                        return headers;
+                                    }
+                                };
 
-                            Volley.newRequestQueue(getApplicationContext()).add(postRequest);
+                                Volley.newRequestQueue(getApplicationContext()).add(postRequest);
+                            }
                         }
                     }
                 });
@@ -360,6 +367,13 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
                 uuid.equalsIgnoreCase(OpalValues.OpalLog5) ||
                 uuid.equalsIgnoreCase(OpalValues.OpalLog6) ||
                 uuid.equalsIgnoreCase(OpalValues.OpalLogIndex);
+    }
+
+    private boolean AllOpalLogsAreCompiled(String opalLogIndex) {
+        if (!UuidIsOneOfTheDiagnosticLogs(opalLogIndex) && opalLogIndex != "OpalLog6") {
+            return false;
+        }
+        return true;
     }
 
     private void checkOtaProgressOnDisconnected() {
