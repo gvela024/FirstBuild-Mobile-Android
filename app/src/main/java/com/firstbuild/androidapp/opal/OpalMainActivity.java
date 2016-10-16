@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -277,6 +278,11 @@ public class OpalMainActivity extends AppCompatActivity implements OTAConfirmDia
                                         return headers;
                                     }
                                 };
+                                postRequest.setRetryPolicy(new DefaultRetryPolicy(
+                                        0,
+                                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+                                ));
 
                                 Volley.newRequestQueue(getApplicationContext()).add(postRequest);
                             }
